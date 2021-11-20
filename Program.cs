@@ -6,16 +6,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Antiforgery;
 
-var builder = WebApplication.CreateBuilder(args);
-
-var sessionTimeoutInMin = builder.Configuration.GetValue<int>("SessionTimeoutInMin", 60);
-var url = builder.Configuration.GetValue<string>("Url", "http://+:8080");
-
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
+var sessionTimeoutInMin = builder.Configuration.GetValue<int>("SessionTimeoutInMin", 60);
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(sessionTimeoutInMin);
@@ -26,14 +24,6 @@ builder.Services.AddAntiforgery(setup => {
 });
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("corsPolicy", builder =>
-    {
-        builder.AllowAnyOrigin();
-    });
-});
 
 builder.Services.AddAuthorization(options =>
 {
@@ -102,13 +92,12 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 app.UseRouting();
-app.UseCors();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
 
-app.Use((ctx, next) => {
+app.Use(async (ctx, next) => {
     var antiforgery = app.Services.GetService<IAntiforgery>();
 
     if (antiforgery == null) {
@@ -123,7 +112,29 @@ app.Use((ctx, next) => {
 
     ctx.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken, 
                 new CookieOptions() { HttpOnly = false });
-    return next(ctx);
+    
+    await next(ctx);
+});
+
+app.Use(async (ctx, next) => {
+    var antiforgery = app.Services.GetService<IAntiforgery>();
+
+    if (antiforgery == null) {
+        throw new Exception("IAntiforgery service exptected!");
+    }
+
+    var currentUrl = ctx.Request.Path.ToString().ToLower();
+    var apiPath = builder.Configuration.GetValue<string>("ApiPath", "/api/").ToLower();
+    if (currentUrl.StartsWith("/api") 
+        && ! await antiforgery.IsRequestValidAsync(ctx) ) {
+        ctx.Response.StatusCode = 400;
+        await ctx.Response.WriteAsJsonAsync(new {
+            Error = "XSRF token validadation failed"
+        });
+        return;
+    }
+    
+    await next(ctx);
 });
 
 app.MapGet("/userinfo", (ClaimsPrincipal user) => {
@@ -182,10 +193,16 @@ app.MapReverseProxy(pipeline =>
         // Console.WriteLine("Add access_token: " + token);
 
         // TODO: Refresh Token if expired
+        
+        var currentUrl = ctx.Request.Path.ToString().ToLower();
+        var apiPath = builder.Configuration.GetValue<string>("ApiPath", "/api/").ToLower();
 
-        ctx.Request.Headers.Add("Authorization", "Bearer " + token);
+        if (!string.IsNullOrEmpty(token) && currentUrl.StartsWith(apiPath)) {
+            ctx.Request.Headers.Add("Authorization", "Bearer " + token);
+        }
         await next().ConfigureAwait(false);
     });
 });
 
+var url = builder.Configuration.GetValue<string>("Url", "http://+:8080");
 app.Run(url);
