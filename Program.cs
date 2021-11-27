@@ -204,5 +204,6 @@ app.MapReverseProxy(pipeline =>
     });
 });
 
-var url = builder.Configuration.GetValue<string>("Url", "http://+:8080");
-app.Run(url);
+// var url = builder.Configuration.GetValue<string>("Url", "http://+:8080");
+// app.Run(url);
+app.Run();
