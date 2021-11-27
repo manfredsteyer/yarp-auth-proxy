@@ -204,6 +204,8 @@ app.MapReverseProxy(pipeline =>
     });
 });
 
+Console.WriteLine("Starting Yarp");
+
 // var url = builder.Configuration.GetValue<string>("Url", "http://+:8080");
 // app.Run(url);
 app.Run();
