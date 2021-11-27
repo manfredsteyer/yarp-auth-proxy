@@ -18,5 +18,8 @@
         "titleBar.inactiveBackground": "#11d5b299",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "#11d5b2"
+    "peacock.color": "#11d5b2",
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "bin\\Release\\net6.0\\publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/c5add4b0-2b33-43d7-a5b3-602ea01847fd/resourceGroups/flight-api/providers/Microsoft.Web/sites/demo-auth-gateway"
 }

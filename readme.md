@@ -2,6 +2,10 @@
 
 _... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ... aka Forward Authentication Service_ ...
 
+![All requests are tunneled through the Auth Gateway](./gateway.png)
+
+> Shift the use of security standards such as OAuth2 and OpenId Connect to the server side. This drastically simplifies the implementation of the SPA and makes your solution more secure.
+
 ## Features
 
 - ☑️ Easily implementing Authentication, Authorization, and SSO for SPAs (e. g. Angular) by making this gateway taking care of the heavy lifting on the serve side
@@ -27,6 +31,28 @@ This example shown a reverse proxy orchestrating a SPA with a RESTful API (resou
 
 Also, have a look into the ``appsettings.json``.
 
+## Live-Demo
+
+see https://demo-auth-gateway.azurewebsites.net
+
+
+### Demo-Client
+
+The used demo client literally doesn't do a thing regarding security. It relays on the gateway and assumes that the gateway provides the following local paths:
+
+- ``/login:`` (Re)login the user
+- ``/logout:`` Logout the user
+- ``/userinfo:`` Get info about the user as a JSON document (e. g. ``given_name``)
+- ``/api:`` Assess to the API. The gateway forwards the ``access_token``
+
+Please find the source code of the demo client here:
+
+https://github.com/manfredsteyer/auth-gateway-client
+
+
+
 ## Further Readings
 
-[More on Microsoft's YARP](https://microsoft.github.io/reverse-proxy/articles/getting-started.html) (Yet Another Reverse Proxy).
+This implementation uses [Microsoft's YARP](https://microsoft.github.io/reverse-proxy/articles/getting-started.html) (Yet Another Reverse Proxy). 
+
+And the good message is: YARP can do so much more. Load balancing, health checking, and distributed tracing are just some examples.
