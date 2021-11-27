@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 public static class TokenHandler {
+
     public static void HandleToken(TokenValidatedContext context) {
         if (context.TokenEndpointResponse == null)
         {
@@ -14,10 +15,10 @@ public static class TokenHandler {
         var expiresIn = context.TokenEndpointResponse.ExpiresIn;
         var expiresAt = new DateTimeOffset(DateTime.Now).AddSeconds(Convert.ToInt32(expiresIn));
 
-        context.HttpContext.Session.SetString("accessToken", accessToken);
-        context.HttpContext.Session.SetString("idToken", idToken);
-        context.HttpContext.Session.SetString("refreshToken", refreshToken);
-        context.HttpContext.Session.SetString("expiresAt", "" + expiresAt.ToUnixTimeSeconds());
+        context.HttpContext.Session.SetString(SessionKeys.ACCESS_TOKEN, accessToken);
+        context.HttpContext.Session.SetString(SessionKeys.ID_TOKEN, idToken);
+        context.HttpContext.Session.SetString(SessionKeys.REFRESH_TOKEN, refreshToken);
+        context.HttpContext.Session.SetString(SessionKeys.EXPIRES_AT, "" + expiresAt.ToUnixTimeSeconds());
         // context.HttpContext.Session.SetString("tokenEndpoint", options.Configuration.TokenEndpoint);
 
         // Console.WriteLine("LoggedIn");

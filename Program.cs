@@ -5,28 +5,29 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Read config
-var apiPath = builder.Configuration.GetValue<string>("Gateway:ApiPath", "/api/").ToLower();
-var url = builder.Configuration.GetValue<string>("Gateway:Url", "");
+// Read config and OIDC discovery document
+var config = builder.Configuration.GetGatewayConfig();
+
+var discoService = new DiscoveryService();
+var disco = await discoService.loadDiscoveryDocument(config.Authority);
+
+if (string.IsNullOrEmpty(disco.token_endpoint)) {
+    throw new Exception("token_endpoint in discovery document expected");
+}
 
 // Configure Services
 builder.Services.AddDistributedMemoryCache();
-builder.AddGateway();
+builder.AddGateway(config, disco);
 
 // Build App and add Middleware
 var app = builder.Build();
-app.UseGateway(apiPath);
-
-
-var disco = new DiscoveryService();
-var doc = await disco.loadDiscoveryDocument("https://idsvr4.azurewebsites.net");
-Console.WriteLine("endpoint: " + doc.token_endpoint);
+app.UseGateway();
 
 // Start Gateway
-if (string.IsNullOrEmpty(url)) {
+if (string.IsNullOrEmpty(config.Url)) {
     app.Run();
 }
 else {
-    app.Run(url);
+    app.Run(config.Url);
 }
 

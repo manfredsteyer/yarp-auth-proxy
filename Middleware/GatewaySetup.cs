@@ -5,13 +5,16 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 public static class GatewaySetup
 {
-
-    public static void AddGateway(this WebApplicationBuilder builder)
+    public static void AddGateway(this WebApplicationBuilder builder, GatewayConfig config, DiscoveryDocument disco)
     {
         builder.Services.AddReverseProxy()
             .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
-        var sessionTimeoutInMin = builder.Configuration.GetValue<int>("Gateway:SessionTimeoutInMin", 60);
+        builder.Services.AddSingleton<DiscoveryDocument>(disco);
+        builder.Services.AddSingleton<GatewayConfig>(config);
+        builder.Services.AddSingleton<TokenRefreshService>();
+
+        var sessionTimeoutInMin = config.SessionTimeoutInMin;
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(sessionTimeoutInMin);
@@ -23,6 +26,7 @@ public static class GatewaySetup
         });
 
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        builder.Services.AddSingleton<DiscoveryService>();
 
         builder.Services.AddAuthorization(options =>
         {
@@ -45,10 +49,10 @@ public static class GatewaySetup
         .AddOpenIdConnect(options =>
         {
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.Authority = builder.Configuration.GetValue<string>("OpenIdConnect:Authority");
-            options.ClientId = builder.Configuration.GetValue<string>("OpenIdConnect:ClientId");
+            options.Authority = config.Authority;
+            options.ClientId = config.ClientId;
             options.UsePkce = true;
-            options.ClientSecret = builder.Configuration.GetValue<string>("OpenIdConnect:ClientSecret");
+            options.ClientSecret = config.ClientSecret;
             options.ResponseType = OpenIdConnectResponseType.Code;
             options.SaveTokens = false;
             options.GetClaimsFromUserInfoEndpoint = true;
@@ -56,7 +60,7 @@ public static class GatewaySetup
             options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
             options.RequireHttpsMetadata = false;
 
-            var scopes = builder.Configuration.GetValue<string>("OpenIdConnect:Scopes");
+            var scopes = config.Scopes;
             var scopeArray = scopes.Split(" ");
             foreach (var scope in scopeArray)
             {
@@ -71,19 +75,24 @@ public static class GatewaySetup
         });
     }
 
-    public static void UseGateway(this WebApplication app, string apiPath) {
+    private static void UseYarp(this WebApplication app)
+    {
+        app.MapReverseProxy(pipeline =>
+        {
+            pipeline.UseGatewayPipeline();
+        });
+    }
+
+    public static void UseGateway(this WebApplication app)
+    {
         app.UseRouting();
         app.UseSession();
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseCookiePolicy();
-
-        app.UseXsrfCookie(apiPath);
+        app.UseXsrfCookie();
         app.UseGatewayEndpoints();
-
-        app.MapReverseProxy(pipeline =>
-        {
-            pipeline.UseGatewayPipeline(apiPath);
-        });
+        app.UseYarp();
     }
+
 }

@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Antiforgery;
 public static class XsrfMiddleware
 {
 
-    public static void UseXsrfCookie(this WebApplication app, string apiPath) {
+    public static void UseXsrfCookie(this WebApplication app) {
         app.UseXsrfCookieCreator();
-        app.USeXsrfCookieChecks(apiPath);
+        app.UseXsrfCookieChecks();
     }
 
     public static void UseXsrfCookieCreator(this WebApplication app)
@@ -34,8 +34,11 @@ public static class XsrfMiddleware
         });
     }
 
-    public static void USeXsrfCookieChecks(this WebApplication app, string apiPath)
+    public static void UseXsrfCookieChecks(this WebApplication app)
     {
+        var config = app.Services.GetRequiredService<GatewayConfig>();
+        var apiPath = config.ApiPath;
+
         app.Use(async (ctx, next) =>
         {
             var antiforgery = app.Services.GetService<IAntiforgery>();

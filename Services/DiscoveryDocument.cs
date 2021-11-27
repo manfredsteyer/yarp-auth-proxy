@@ -1,4 +1,4 @@
 
 public class DiscoveryDocument {
-    public string? token_endpoint { get; set;}
+    public string token_endpoint { get; set;} = "";
 }

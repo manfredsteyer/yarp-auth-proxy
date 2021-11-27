@@ -7,13 +7,13 @@ public class DiscoveryService {
 
         var baseUrl = new Uri(authority);
         var url = new Uri(baseUrl, DISCO_URL);
-        
+
         var doc = await httpClient.GetFromJsonAsync<DiscoveryDocument>(url);
         
         if (doc == null) {
             throw new Exception("error loading discovery document from " + url);
         }
-        
+
         return doc;
     }
 }
