@@ -4,7 +4,7 @@ _... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ... aka Forward A
 
 ![All requests are tunneled through the Auth Gateway](./gateway.png)
 
-> Shift the use of security standards such as OAuth2 and OpenId Connect to the server side. This drastically simplifies the implementation of the SPA and makes your solution more secure.
+> This gateway shifts the use of security standards such as OAuth2 and OpenId Connect to the server side. This drastically simplifies the implementation of the SPA and makes your solution more secure.
 
 ## 🔥 Features
 
