@@ -16,4 +16,6 @@ public record GatewayConfig {
 
     public string Scopes { get; set; } = "";
 
+    public string LogoutUrl { get; set; } = "";
+
 }

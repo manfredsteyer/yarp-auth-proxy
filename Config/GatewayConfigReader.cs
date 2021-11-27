@@ -11,7 +11,8 @@ public static class GetewayConfigReader
             Authority = config.GetValue<string>("OpenIdConnect:Authority"),
             ClientId = config.GetValue<string>("OpenIdConnect:ClientId"),
             ClientSecret = config.GetValue<string>("OpenIdConnect:ClientSecret"),
-            Scopes = config.GetValue<string>("OpenIdConnect:Scopes", "")
+            Scopes = config.GetValue<string>("OpenIdConnect:Scopes", ""),
+            LogoutUrl = config.GetValue<string>("OpenIdConnect:LogoutUrl", "")
         };
 
         return result;

@@ -72,6 +72,12 @@ public static class GatewaySetup
                 TokenHandler.HandleToken(context);
                 return Task.FromResult(0);
             };
+
+            options.Events.OnRedirectToIdentityProviderForSignOut = (context) =>
+            {
+                LogoutHandler.HandleLogout(context, config);
+                return Task.CompletedTask;
+            };
         });
     }
 
