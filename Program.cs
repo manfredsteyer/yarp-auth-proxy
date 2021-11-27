@@ -17,6 +17,11 @@ builder.AddGateway();
 var app = builder.Build();
 app.UseGateway(apiPath);
 
+
+var disco = new DiscoveryService();
+var doc = await disco.loadDiscoveryDocument("https://idsvr4.azurewebsites.net");
+Console.WriteLine("endpoint: " + doc.token_endpoint);
+
 // Start Gateway
 if (string.IsNullOrEmpty(url)) {
     app.Run();
