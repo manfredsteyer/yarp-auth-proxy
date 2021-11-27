@@ -11,6 +11,7 @@ public static class GatewayEndpoints
         app.UseUserInfoEndpoint();
         app.UseLoginEndpoint();
         app.UseLogoutEndpoint();
+        app.UseGatewayStatusEndpoint();
     }
 
     private static void UseLogoutEndpoint(this WebApplication app)
@@ -71,4 +72,17 @@ public static class GatewayEndpoints
             return dict;
         });
     }
+
+    private static void UseGatewayStatusEndpoint(this WebApplication app)
+    {
+        app.MapGet("/gatewaystatus", (ClaimsPrincipal user) =>
+        {
+            var dict = new Dictionary<string, string>();
+
+            dict.Add("version", "1.0.0");
+
+            return dict;
+        });
+    }
+
 }
