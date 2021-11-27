@@ -1,6 +1,6 @@
 # Proof of Concept for an Auth Gateway
 
-_... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ..._
+_... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ... aka Forward Authentication Service_ ...
 
 ## Features
 

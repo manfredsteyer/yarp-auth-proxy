@@ -104,7 +104,7 @@ app.Use(async (ctx, next) => {
         throw new Exception("IAntiforgery service exptected!");
     }
 
-    var tokens = antiforgery.GetAndStoreTokens(ctx);
+    var tokens = antiforgery!.GetAndStoreTokens(ctx);
 
     if (tokens.RequestToken == null) {
         throw new Exception("token exptected!");
