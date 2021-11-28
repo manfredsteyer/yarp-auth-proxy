@@ -1,4 +1,4 @@
-# Proof of Concept for an Auth Gateway
+# Proof of Concept for an Auth Gateway for SPA
 
 _... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ... aka Forward Authentication Service_ ...
 
@@ -12,6 +12,10 @@ _... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ... aka Forward A
   
 - ☑️ Tokens (id_token, access_token, refresh_token) are only stored on server-side in order to increase security
 
+- ☑️ Uses OAuth 2 and OpenId Connect (OIDC)
+
+- ☑️ Successfully tested with Identity Server, Keycloak, and Auth0
+
 - ☑️ Opaque handling of XSRF tokens. Angular apps will use them automatically.
 
 - ☑️ ``login``, ``logout``, and ``userinfo`` endpoints for SPA
@@ -20,7 +24,7 @@ _... aka Auth Reverse Proxy ... aka Backend for Frontend (BFF) ... aka Forward A
 
 - ☑️ Configuration via ``appsettings.json``
 
-- ☑️ Prepared for the upcoming OAuth 2.1
+- ☑️ Follows current best practices and is hence prepared for the upcoming OAuth 2.1
   
 
 ## ⚡️ Live-Demo
@@ -50,7 +54,6 @@ https://github.com/manfredsteyer/auth-gateway-client
 4. Call the Demo App via http://localhost:5123 (please find the actual used port number on the console)
 
 Also, have a look into the ``appsettings.json``.
-
 
 ## Further Readings
 
