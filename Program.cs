@@ -7,13 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Read config and OIDC discovery document
 var config = builder.Configuration.GetGatewayConfig();
-
 var discoService = new DiscoveryService();
 var disco = await discoService.loadDiscoveryDocument(config.Authority);
-
-if (string.IsNullOrEmpty(disco.token_endpoint)) {
-    throw new Exception("token_endpoint in discovery document expected");
-}
 
 // Configure Services
 builder.Services.AddDistributedMemoryCache();

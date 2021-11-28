@@ -1,9 +1,7 @@
-
 using Microsoft.AspNetCore.Antiforgery;
 
 public static class XsrfMiddleware
 {
-
     public static void UseXsrfCookie(this WebApplication app) {
         app.UseXsrfCookieCreator();
         app.UseXsrfCookieChecks();

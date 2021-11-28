@@ -1,4 +1,3 @@
-
 public static class GetewayConfigReader
 {
     public static GatewayConfig GetGatewayConfig(this ConfigurationManager config)

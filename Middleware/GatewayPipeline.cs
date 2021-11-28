@@ -1,4 +1,3 @@
-
 public static class GatewayPipeline
 {
     private static bool isExpired(HttpContext ctx)

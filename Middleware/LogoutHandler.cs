@@ -1,6 +1,4 @@
-
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-
 
 public static class LogoutHandler {
     public static void HandleLogout(RedirectContext context, GatewayConfig config)
