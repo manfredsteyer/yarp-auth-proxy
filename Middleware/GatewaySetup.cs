@@ -13,6 +13,7 @@ public static class GatewaySetup
         builder.Services.AddSingleton<GatewayConfig>(config);
         builder.Services.AddSingleton<TokenRefreshService>();
         builder.Services.AddSingleton<TokenExchangeService>();
+        builder.Services.AddSingleton<ApiTokenService>();
 
         var sessionTimeoutInMin = config.SessionTimeoutInMin;
         builder.Services.AddSession(options =>
