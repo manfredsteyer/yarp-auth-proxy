@@ -6,8 +6,8 @@ public static class GetewayConfigReader
         {
             Url = config.GetValue<string>("Gateway:Url", ""),
             SessionTimeoutInMin = config.GetValue<int>("Gateway:SessionTimeoutInMin", 60),
-            ApiPath = config.GetValue<string>("Gateway:ApiPath", "/api/"),
-            ApiScopes = config.GetValue<string>("Gateway:ApiScopes", ""),
+            // ApiPath = config.GetValue<string>("Gateway:ApiPath", "/api/"),
+            // ApiScopes = config.GetValue<string>("Gateway:ApiScopes", ""),
 
             Authority = config.GetValue<string>("OpenIdConnect:Authority"),
             ClientId = config.GetValue<string>("OpenIdConnect:ClientId"),
@@ -15,6 +15,8 @@ public static class GetewayConfigReader
             Scopes = config.GetValue<string>("OpenIdConnect:Scopes", ""),
             LogoutUrl = config.GetValue<string>("OpenIdConnect:LogoutUrl", ""),
             QueryUserInfoEndpoint = config.GetValue<bool>("OpenIdConnect:QueryUserInfoEndpoint", true),
+
+            ApiConfigs = config.GetSection("Apis").Get<ApiConfig[]>(),
         };
 
         return result;

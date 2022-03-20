@@ -35,7 +35,7 @@ public static class XsrfMiddleware
     public static void UseXsrfCookieChecks(this WebApplication app)
     {
         var config = app.Services.GetRequiredService<GatewayConfig>();
-        var apiPath = config.ApiPath;
+        var apiConfigs = config.ApiConfigs;
 
         app.Use(async (ctx, next) =>
         {
@@ -47,7 +47,7 @@ public static class XsrfMiddleware
             }
 
             var currentUrl = ctx.Request.Path.ToString().ToLower();
-            if (currentUrl.StartsWith(apiPath)
+            if (apiConfigs.Any(c => currentUrl.StartsWith(c.ApiPath))
                 && !await antiforgery.IsRequestValidAsync(ctx))
             {
                 ctx.Response.StatusCode = 400;

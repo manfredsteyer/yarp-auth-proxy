@@ -1,6 +1,6 @@
 public static class GatewayPipeline
 {
-    private static bool isExpired(HttpContext ctx)
+    private static bool IsExpired(HttpContext ctx)
     {
         var expiresAt = Convert.ToInt64(ctx.Session.GetString(SessionKeys.EXPIRES_AT)) - 30;
         var now = new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds();
@@ -9,19 +9,19 @@ public static class GatewayPipeline
         return expired;
     }
 
-    private static bool hasRefreshToken(HttpContext ctx) {
+    private static bool HasRefreshToken(HttpContext ctx) {
         var refreshToken = ctx.Session.GetString(SessionKeys.REFRESH_TOKEN);
         return !string.IsNullOrEmpty(refreshToken);
     }
 
-    private static string getRefreshToken(HttpContext ctx) {
+    private static string GetRefreshToken(HttpContext ctx) {
         var refreshToken = ctx.Session.GetString(SessionKeys.REFRESH_TOKEN);
         return refreshToken ?? "";
     }
 
-    private static async Task refresh(HttpContext ctx, TokenRefreshService tokenRefreshService)
+    private static async Task Refresh(HttpContext ctx, TokenRefreshService tokenRefreshService)
     {
-        var refreshToken = getRefreshToken(ctx);
+        var refreshToken = GetRefreshToken(ctx);
 
         var resp = await tokenRefreshService.RefreshAsync(refreshToken);
 
@@ -39,26 +39,48 @@ public static class GatewayPipeline
 
     }
 
-    private static async Task<string> LookupApiToken(HttpContext ctx, TokenExchangeService tokenExchangeService, string apiPath, string token)
-    {
-        // TODO: Respect serveral APIs from several auth severs
-        // TODO: Perform individual token refresh
-
-        if (ctx.Session.Keys.Contains(SessionKeys.API_ACCESS_TOKEN)) {
-            return ctx.Session.GetString(SessionKeys.API_ACCESS_TOKEN) ?? "";
+    private static TokenExchangeResponse? GetCachedApiToken(HttpContext ctx, ApiConfig apiConfig) {
+        var cache = ctx.Session.GetObject<Dictionary<string, TokenExchangeResponse>>(SessionKeys.API_ACCESS_TOKEN);
+        if (cache == null) {
+            return null;
         }
 
-        var response = await tokenExchangeService.Exchange(token);
-        var accessToken = response.access_token;
+        if (!cache.ContainsKey(apiConfig.ApiPath)) {
+            return null;
+        }
 
-        ctx.Session.SetString(SessionKeys.API_ACCESS_TOKEN, accessToken);
-        return accessToken;
+        return cache[apiConfig.ApiPath];
     }
 
-    private static void InvalidateApiTokens(HttpContext ctx)
+    private static void SetCachedApiToken(HttpContext ctx, ApiConfig apiConfig, TokenExchangeResponse response) {
+        var cache = ctx.Session.GetObject<Dictionary<string, TokenExchangeResponse>>(SessionKeys.API_ACCESS_TOKEN);
+        if (cache == null) {
+            cache = new Dictionary<string, TokenExchangeResponse>();
+        }
+
+        cache[apiConfig.ApiPath] = response;
+
+        ctx.Session.SetObject<Dictionary<string, TokenExchangeResponse>>(SessionKeys.API_ACCESS_TOKEN, cache);
+    }
+
+    private static async Task<string> LookupApiToken(HttpContext ctx, TokenExchangeService tokenExchangeService, ApiConfig apiConfig, string token)
     {
-        ctx.Session.Remove(SessionKeys.API_ACCESS_TOKEN);
+        var apiToken = GetCachedApiToken(ctx, apiConfig);
+
+        if (apiToken != null) {
+            // TODO: Perform individual token refresh
+            return apiToken.access_token;
+        }
+
+        Console.WriteLine("--- Perform Token Exchange ---");
+
+        var response = await tokenExchangeService.Exchange(token, apiConfig);
+        SetCachedApiToken(ctx, apiConfig, response);
+
+        return response.access_token;
     }
+
+
 
     public static void UseGatewayPipeline(this IReverseProxyApplicationBuilder pipeline)
     {
@@ -66,31 +88,42 @@ public static class GatewayPipeline
         var config = pipeline.ApplicationServices.GetRequiredService<GatewayConfig>();
         var tokenExchangeService = pipeline.ApplicationServices.GetRequiredService<TokenExchangeService>();
         
-        var apiPath = config.ApiPath;
-        
         pipeline.Use(async (ctx, next) =>
         {
-            if (isExpired(ctx) && hasRefreshToken(ctx))
+            if (IsExpired(ctx) && HasRefreshToken(ctx))
             {
                 InvalidateApiTokens(ctx);
-                await refresh(ctx, tokenRefreshService);
+                await Refresh(ctx, tokenRefreshService);
             }
 
             var token = ctx.Session.GetString(SessionKeys.ACCESS_TOKEN);
             var currentUrl = ctx.Request.Path.ToString().ToLower();
 
-            if (!string.IsNullOrEmpty(token) && currentUrl.StartsWith(apiPath))
-            {
-                if (!string.IsNullOrEmpty(config.ApiScopes))
-                {
-                    token = await LookupApiToken(ctx, tokenExchangeService, apiPath, token);
-                    ShowDebugMessage(token);
-                }
+            var apiConfig = config.ApiConfigs.FirstOrDefault(c => currentUrl.StartsWith(c.ApiPath));
 
+            if (!string.IsNullOrEmpty(token) && apiConfig != null)
+            {
+                token = await GetApiToken(ctx, tokenExchangeService, token, apiConfig);
                 ctx.Request.Headers.Add("Authorization", "Bearer " + token);
             }
             await next().ConfigureAwait(false);
         });
+    }
+    private static async Task<string> GetApiToken(HttpContext ctx, TokenExchangeService tokenExchangeService, string token, ApiConfig? apiConfig)
+    {
+        string? apiToken = null;
+        if (apiConfig != null && !string.IsNullOrEmpty(apiConfig.ApiScopes))
+        {
+            apiToken = await LookupApiToken(ctx, tokenExchangeService, apiConfig, token);
+            ShowDebugMessage(token);
+        }
+
+        if (!string.IsNullOrEmpty(apiToken)) {
+            return apiToken;
+        }
+        else {
+            return token;
+        }
     }
 
     private static void ShowDebugMessage(string? token)
@@ -101,5 +134,10 @@ public static class GatewayPipeline
         Console.WriteLine("---- api access_token ----");
         Console.WriteLine(token);
         Console.WriteLine("--------");
+    }
+
+    private static void InvalidateApiTokens(HttpContext ctx)
+    {
+        ctx.Session.Remove(SessionKeys.API_ACCESS_TOKEN);
     }
 }
