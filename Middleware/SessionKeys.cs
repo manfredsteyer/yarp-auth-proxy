@@ -3,4 +3,5 @@ public class SessionKeys {
     public const string ID_TOKEN = "idToken";
     public const string REFRESH_TOKEN = "refreshToken";
     public const string EXPIRES_AT = "expiresAt";
+    public const string API_ACCESS_TOKEN = "apiAccessToken";
 }

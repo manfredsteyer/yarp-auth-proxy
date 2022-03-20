@@ -39,10 +39,32 @@ public static class GatewayPipeline
 
     }
 
+    private static async Task<string> LookupApiToken(HttpContext ctx, TokenExchangeService tokenExchangeService, string apiPath, string token)
+    {
+        // TODO: Respect serveral APIs from several auth severs
+        // TODO: Perform individual token refresh
+
+        if (ctx.Session.Keys.Contains(SessionKeys.API_ACCESS_TOKEN)) {
+            return ctx.Session.GetString(SessionKeys.API_ACCESS_TOKEN) ?? "";
+        }
+
+        var response = await tokenExchangeService.Exchange(token);
+        var accessToken = response.access_token;
+
+        ctx.Session.SetString(SessionKeys.API_ACCESS_TOKEN, accessToken);
+        return accessToken;
+    }
+
+    private static void InvalidateApiTokens(HttpContext ctx)
+    {
+        ctx.Session.Remove(SessionKeys.API_ACCESS_TOKEN);
+    }
+
     public static void UseGatewayPipeline(this IReverseProxyApplicationBuilder pipeline)
     {
         var tokenRefreshService = pipeline.ApplicationServices.GetRequiredService<TokenRefreshService>();
         var config = pipeline.ApplicationServices.GetRequiredService<GatewayConfig>();
+        var tokenExchangeService = pipeline.ApplicationServices.GetRequiredService<TokenExchangeService>();
         
         var apiPath = config.ApiPath;
         
@@ -50,6 +72,7 @@ public static class GatewayPipeline
         {
             if (isExpired(ctx) && hasRefreshToken(ctx))
             {
+                InvalidateApiTokens(ctx);
                 await refresh(ctx, tokenRefreshService);
             }
 
@@ -58,9 +81,25 @@ public static class GatewayPipeline
 
             if (!string.IsNullOrEmpty(token) && currentUrl.StartsWith(apiPath))
             {
+                if (!string.IsNullOrEmpty(config.ApiScopes))
+                {
+                    token = await LookupApiToken(ctx, tokenExchangeService, apiPath, token);
+                    ShowDebugMessage(token);
+                }
+
                 ctx.Request.Headers.Add("Authorization", "Bearer " + token);
             }
             await next().ConfigureAwait(false);
         });
+    }
+
+    private static void ShowDebugMessage(string? token)
+    {
+        // For demonstration purposes
+        // Don't do this in production!
+        
+        Console.WriteLine("---- api access_token ----");
+        Console.WriteLine(token);
+        Console.WriteLine("--------");
     }
 }

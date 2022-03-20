@@ -12,6 +12,7 @@ public static class GatewaySetup
         builder.Services.AddSingleton<DiscoveryDocument>(disco);
         builder.Services.AddSingleton<GatewayConfig>(config);
         builder.Services.AddSingleton<TokenRefreshService>();
+        builder.Services.AddSingleton<TokenExchangeService>();
 
         var sessionTimeoutInMin = config.SessionTimeoutInMin;
         builder.Services.AddSession(options =>
