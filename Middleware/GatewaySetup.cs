@@ -14,6 +14,8 @@ public static class GatewaySetup
         builder.Services.AddSingleton<TokenRefreshService>();
         builder.Services.AddSingleton<TokenExchangeService>();
         builder.Services.AddSingleton<ApiTokenService>();
+        builder.Services.AddSingleton<GatewayService>();
+        builder.Services.AddSingleton<TokenHandler>();
 
         var sessionTimeoutInMin = config.SessionTimeoutInMin;
         builder.Services.AddSession(options =>
@@ -70,7 +72,8 @@ public static class GatewaySetup
 
             options.Events.OnTokenValidated = (context) =>
             {
-                TokenHandler.HandleToken(context);
+                var tokenHandler = context.HttpContext.RequestServices.GetRequiredService<TokenHandler>();
+                tokenHandler.HandleToken(context);
                 return Task.FromResult(0);
             };
 

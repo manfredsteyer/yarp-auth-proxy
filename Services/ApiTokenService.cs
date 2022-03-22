@@ -1,9 +1,14 @@
 public class ApiTokenService {
 
     private TokenExchangeService tokenExchangeService;
+    private ILogger<ApiTokenService> logger;
 
-    public ApiTokenService(TokenExchangeService tokenExchangeService) {
+    public ApiTokenService(
+        TokenExchangeService tokenExchangeService,
+        ILogger<ApiTokenService> logger
+    ) {
         this.tokenExchangeService = tokenExchangeService;
+        this.logger = logger;
     }
 
     public void InvalidateApiTokens(HttpContext ctx)
@@ -44,7 +49,7 @@ public class ApiTokenService {
             return apiToken.access_token;
         }
 
-        Console.WriteLine("--- Perform Token Exchange ---");
+        logger.LogDebug($"---- Perform Token Exchange for {apiConfig.ApiScopes} ----");
 
         var response = await tokenExchangeService.Exchange(token, apiConfig);
         SetCachedApiToken(ctx, apiConfig, response);

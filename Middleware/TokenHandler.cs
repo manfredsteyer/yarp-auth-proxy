@@ -1,8 +1,14 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
-public static class TokenHandler {
+public class TokenHandler {
 
-    public static void HandleToken(TokenValidatedContext context)
+    private ILogger<TokenHandler> logger;
+
+    public TokenHandler(ILogger<TokenHandler> logger) {
+        this.logger = logger;
+    }
+
+    public void HandleToken(TokenValidatedContext context)
     {
         if (context.TokenEndpointResponse == null)
         {
@@ -23,17 +29,10 @@ public static class TokenHandler {
         context.HttpContext.Session.SetString(SessionKeys.EXPIRES_AT, "" + expiresAt.ToUnixTimeSeconds());
     }
 
-    private static void ShowDebugInfo(string accessToken, string idToken, string refreshToken)
+    private void ShowDebugInfo(string accessToken, string idToken, string refreshToken)
     {
-        // For demonstration purposes
-        // Don't do this in production!
-        
-        Console.Write("---- DEBUG INFOS ----");
-        Console.WriteLine("ACCESS_TOKEN: " + accessToken);
-        Console.Write("--------");
-        Console.WriteLine("ID_TOKEN: " + idToken);
-        Console.Write("--------");
-        Console.WriteLine("REFRESH_TOKEN: " + refreshToken);
-        Console.Write("--------\n");
+        logger.LogDebug($"---- ACCESS_TOKEN ----\n{accessToken}\n--------");
+        logger.LogDebug($"---- ID_TOKEN ----\n{idToken}\n--------");
+        logger.LogDebug($"---- REFRESH_TOKEN ----\n{refreshToken}\n--------");
     }
 }
