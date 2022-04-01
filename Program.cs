@@ -6,7 +6,7 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var builder = WebApplication.CreateBuilder(args);
 
 if (args.Count() > 0) {
-    builder.Configuration.AddJsonFile(args[0]);
+    builder.Configuration.AddJsonFile(args[0], false, true);
 }
 
 // Read config and OIDC discovery document
