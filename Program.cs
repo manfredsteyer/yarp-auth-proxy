@@ -5,6 +5,10 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (args.Count() > 0) {
+    builder.Configuration.AddJsonFile(args[0]);
+}
+
 // Read config and OIDC discovery document
 var config = builder.Configuration.GetGatewayConfig();
 var discoService = new DiscoveryService();
