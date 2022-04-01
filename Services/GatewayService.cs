@@ -61,7 +61,7 @@ public class GatewayService
     private async Task<string> GetApiToken(HttpContext ctx, ApiTokenService apiTokenService, string token, ApiConfig? apiConfig)
     {
         string? apiToken = null;
-        if (apiConfig != null && !string.IsNullOrEmpty(apiConfig.ApiScopes))
+        if (!string.IsNullOrEmpty(apiConfig?.ApiScopes) || !string.IsNullOrEmpty(apiConfig?.ApiAudience))
         {
             apiToken = await apiTokenService.LookupApiToken(ctx, apiConfig, token);
             ShowDebugMessage(apiToken);
@@ -98,6 +98,9 @@ public class GatewayService
         if (!string.IsNullOrEmpty(token) && apiConfig != null)
         {
             var apiToken = await GetApiToken(ctx, apiTokenService, token, apiConfig);
+            
+            logger.LogDebug($"---- Adding Token for reqeuest ----\n{currentUrl}\n\n{apiToken}\n--------");
+            
             ctx.Request.Headers.Add("Authorization", "Bearer " + apiToken);
         }
     }

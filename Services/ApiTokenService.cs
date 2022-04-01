@@ -1,10 +1,10 @@
 public class ApiTokenService {
 
-    private TokenExchangeService tokenExchangeService;
+    private ITokenExchangeService tokenExchangeService;
     private ILogger<ApiTokenService> logger;
 
     public ApiTokenService(
-        TokenExchangeService tokenExchangeService,
+        ITokenExchangeService tokenExchangeService,
         ILogger<ApiTokenService> logger
     ) {
         this.tokenExchangeService = tokenExchangeService;

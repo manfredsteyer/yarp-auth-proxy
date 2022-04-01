@@ -1,9 +1,11 @@
-public class TokenExchangeService : ITokenExchangeService
+
+
+public class AzureAdTokenExchangeService : ITokenExchangeService
 {
     private DiscoveryDocument disco;
     private GatewayConfig config;
 
-    public TokenExchangeService(GatewayConfig config, DiscoveryDocument disco)
+    public AzureAdTokenExchangeService(GatewayConfig config, DiscoveryDocument disco)
     {
         this.disco = disco;
         this.config = config;
@@ -11,6 +13,7 @@ public class TokenExchangeService : ITokenExchangeService
 
     public async Task<TokenExchangeResponse> Exchange(string accessToken, ApiConfig apiConfig)
     {
+
         var httpClient = new HttpClient();
         var scope = apiConfig.ApiScopes;
 
@@ -19,13 +22,12 @@ public class TokenExchangeService : ITokenExchangeService
 
         var url = this.disco.token_endpoint;
         var dict = new Dictionary<string, string>();
-        dict["grant_type"] = "urn:ietf:params:oauth:grant-type:token-exchange";
+        dict["grant_type"] = "urn:ietf:params:oauth:grant-type:jwt-bearer";
         dict["client_id"] = this.config.ClientId;
         dict["client_secret"] = this.config.ClientSecret;
-        dict["subject_token"] = accessToken;
+        dict["assertion"] = accessToken;
         dict["scope"] = scope;
-        dict["audience"] = apiConfig.ApiAudience;
-        dict["requested_token_type"] = "urn:ietf:params:oauth:token-type:refresh_token";
+        dict["requested_token_use"] = "on_behalf_of";
 
         var content = new FormUrlEncodedContent(dict);
         var httpResponse = await httpClient.PostAsync(url, content);
