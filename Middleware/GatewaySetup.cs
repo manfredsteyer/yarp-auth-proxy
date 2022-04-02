@@ -4,9 +4,11 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 public static class GatewaySetup
 {
+    private static readonly string ENV_GATEWAY_CONFIG = "GATEWAY_CONFIG"; 
+
     public static void AddConfigFiles(this WebApplicationBuilder builder)
     {
-        var envConfig = Environment.GetEnvironmentVariable("GATEWAY_CONFIG");
+        var envConfig = Environment.GetEnvironmentVariable(ENV_GATEWAY_CONFIG);
         var cmdLineArgs = Environment.GetCommandLineArgs();
 
         if (cmdLineArgs != null && cmdLineArgs.Count() > 1)
