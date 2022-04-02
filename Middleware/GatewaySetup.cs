@@ -4,6 +4,21 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 public static class GatewaySetup
 {
+    public static void AddConfigFiles(this WebApplicationBuilder builder)
+    {
+        var envConfig = Environment.GetEnvironmentVariable("GATEWAY_CONFIG");
+        var cmdLineArgs = Environment.GetCommandLineArgs();
+
+        if (cmdLineArgs != null && cmdLineArgs.Count() > 1)
+        {
+            builder.Configuration.AddJsonFile(cmdLineArgs[1], false, true);
+        }
+        else if (envConfig != null)
+        {
+            builder.Configuration.AddJsonFile(envConfig, false, true);
+        }
+    }
+
     private static void AddTokenExchangeService(this WebApplicationBuilder builder, GatewayConfig config) {
         var strategy = config.TokenExchangeStrategy;
         if (string.IsNullOrEmpty(strategy)) {

@@ -5,9 +5,7 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (args.Count() > 0) {
-    builder.Configuration.AddJsonFile(args[0], false, true);
-}
+builder.AddConfigFiles();
 
 // Read config and OIDC discovery document
 var config = builder.Configuration.GetGatewayConfig();
@@ -23,10 +21,11 @@ var app = builder.Build();
 app.UseGateway();
 
 // Start Gateway
-if (string.IsNullOrEmpty(config.Url)) {
+if (string.IsNullOrEmpty(config.Url))
+{
     app.Run();
 }
-else {
+else
+{
     app.Run(config.Url);
 }
-
