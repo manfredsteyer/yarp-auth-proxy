@@ -1,11 +1,14 @@
+using System.Net.Http.Json;
+using YarpAuthProxy.BffLibrary.Utils.Config;
 
+namespace YarpAuthProxy.BffLibrary.Services;
 
-public class AzureAdTokenExchangeService : ITokenExchangeService
+public class TokenExchangeService : ITokenExchangeService
 {
     private DiscoveryDocument disco;
     private GatewayConfig config;
 
-    public AzureAdTokenExchangeService(GatewayConfig config, DiscoveryDocument disco)
+    public TokenExchangeService(GatewayConfig config, DiscoveryDocument disco)
     {
         this.disco = disco;
         this.config = config;
@@ -13,7 +16,6 @@ public class AzureAdTokenExchangeService : ITokenExchangeService
 
     public async Task<TokenExchangeResponse> Exchange(string accessToken, ApiConfig apiConfig)
     {
-
         var httpClient = new HttpClient();
         var scope = apiConfig.ApiScopes;
 
@@ -22,12 +24,13 @@ public class AzureAdTokenExchangeService : ITokenExchangeService
 
         var url = this.disco.token_endpoint;
         var dict = new Dictionary<string, string>();
-        dict["grant_type"] = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+        dict["grant_type"] = "urn:ietf:params:oauth:grant-type:token-exchange";
         dict["client_id"] = this.config.ClientId;
         dict["client_secret"] = this.config.ClientSecret;
-        dict["assertion"] = accessToken;
+        dict["subject_token"] = accessToken;
         dict["scope"] = scope;
-        dict["requested_token_use"] = "on_behalf_of";
+        dict["audience"] = apiConfig.ApiAudience;
+        dict["requested_token_type"] = "urn:ietf:params:oauth:token-type:refresh_token";
 
         var content = new FormUrlEncodedContent(dict);
         var httpResponse = await httpClient.PostAsync(url, content);

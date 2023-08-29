@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Configuration;
+
+namespace YarpAuthProxy.BffLibrary.Utils.Config;
+
 public static class GetewayConfigReader
 {
     public static GatewayConfig GetGatewayConfig(this ConfigurationManager config)
@@ -7,7 +11,7 @@ public static class GetewayConfigReader
             Url = config.GetValue<string>("Gateway:Url", ""),
             SessionTimeoutInMin = config.GetValue<int>("Gateway:SessionTimeoutInMin", 60),
             TokenExchangeStrategy = config.GetValue<string>("Gateway:TokenExchangeStrategy", ""),
-            
+
             Authority = config.GetValue<string>("OpenIdConnect:Authority"),
             ClientId = config.GetValue<string>("OpenIdConnect:ClientId"),
             ClientSecret = config.GetValue<string>("OpenIdConnect:ClientSecret"),

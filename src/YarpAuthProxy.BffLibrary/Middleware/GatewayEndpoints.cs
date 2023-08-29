@@ -2,6 +2,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+
+namespace YarpAuthProxy.BffLibrary.Middleware;
 
 public static class GatewayEndpoints
 {

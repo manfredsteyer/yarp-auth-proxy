@@ -1,4 +1,7 @@
-public class SessionKeys {
+namespace YarpAuthProxy.BffLibrary.Middleware;
+
+public class SessionKeys
+{
     public const string ACCESS_TOKEN = "accessToken";
     public const string ID_TOKEN = "idToken";
     public const string REFRESH_TOKEN = "refreshToken";

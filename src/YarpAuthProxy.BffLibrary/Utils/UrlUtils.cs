@@ -1,4 +1,6 @@
-public static class UrlUtils {
+namespace YarpAuthProxy.BffLibrary;
+public static class UrlUtils
+{
     public static string CombineUrls(string uri1, string uri2)
     {
         uri1 = uri1.TrimEnd('/');
