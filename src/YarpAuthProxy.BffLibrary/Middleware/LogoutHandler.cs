@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using YarpAuthProxy.BffLibrary.Utils.Config;
 
-public static class LogoutHandler {
+namespace YarpAuthProxy.BffLibrary.Middleware;
+
+public static class LogoutHandler
+{
     public static void HandleLogout(RedirectContext context, GatewayConfig config)
     {
         if (!string.IsNullOrEmpty(config.LogoutUrl))

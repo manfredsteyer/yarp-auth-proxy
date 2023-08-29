@@ -1,10 +1,16 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
-public class TokenHandler {
+namespace YarpAuthProxy.BffLibrary.Middleware;
+
+public class TokenHandler
+{
 
     private ILogger<TokenHandler> logger;
 
-    public TokenHandler(ILogger<TokenHandler> logger) {
+    public TokenHandler(ILogger<TokenHandler> logger)
+    {
         this.logger = logger;
     }
 

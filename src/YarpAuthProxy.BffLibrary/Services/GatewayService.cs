@@ -1,3 +1,10 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using YarpAuthProxy.BffLibrary.Middleware;
+using YarpAuthProxy.BffLibrary.Utils.Config;
+
+namespace YarpAuthProxy.BffLibrary.Services;
+
 public class GatewayService
 {
     private TokenRefreshService tokenRefreshService;
@@ -10,8 +17,9 @@ public class GatewayService
         GatewayConfig config,
         ApiTokenService apiTokenService,
         ILogger<GatewayService> logger
-    ) {
-        this.tokenRefreshService = tokenRefreshService; 
+    )
+    {
+        this.tokenRefreshService = tokenRefreshService;
         this.config = config;
         this.apiTokenService = apiTokenService;
         this.logger = logger;
@@ -98,9 +106,9 @@ public class GatewayService
         if (!string.IsNullOrEmpty(token) && apiConfig != null)
         {
             var apiToken = await GetApiToken(ctx, apiTokenService, token, apiConfig);
-            
+
             logger.LogDebug($"---- Adding Token for reqeuest ----\n{currentUrl}\n\n{apiToken}\n--------");
-            
+
             ctx.Request.Headers.Add("Authorization", "Bearer " + apiToken);
         }
     }

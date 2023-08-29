@@ -1,4 +1,12 @@
-public class ApiTokenService {
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using YarpAuthProxy.BffLibrary.Middleware;
+using YarpAuthProxy.BffLibrary.Utils.Config;
+
+namespace YarpAuthProxy.BffLibrary.Services;
+
+public class ApiTokenService
+{
 
     private ITokenExchangeService tokenExchangeService;
     private ILogger<ApiTokenService> logger;
@@ -6,7 +14,8 @@ public class ApiTokenService {
     public ApiTokenService(
         ITokenExchangeService tokenExchangeService,
         ILogger<ApiTokenService> logger
-    ) {
+    )
+    {
         this.tokenExchangeService = tokenExchangeService;
         this.logger = logger;
     }
@@ -16,22 +25,27 @@ public class ApiTokenService {
         ctx.Session.Remove(SessionKeys.API_ACCESS_TOKEN);
     }
 
-    private TokenExchangeResponse? GetCachedApiToken(HttpContext ctx, ApiConfig apiConfig) {
+    private TokenExchangeResponse? GetCachedApiToken(HttpContext ctx, ApiConfig apiConfig)
+    {
         var cache = ctx.Session.GetObject<Dictionary<string, TokenExchangeResponse>>(SessionKeys.API_ACCESS_TOKEN);
-        if (cache == null) {
+        if (cache == null)
+        {
             return null;
         }
 
-        if (!cache.ContainsKey(apiConfig.ApiPath)) {
+        if (!cache.ContainsKey(apiConfig.ApiPath))
+        {
             return null;
         }
 
         return cache[apiConfig.ApiPath];
     }
 
-    private void SetCachedApiToken(HttpContext ctx, ApiConfig apiConfig, TokenExchangeResponse response) {
+    private void SetCachedApiToken(HttpContext ctx, ApiConfig apiConfig, TokenExchangeResponse response)
+    {
         var cache = ctx.Session.GetObject<Dictionary<string, TokenExchangeResponse>>(SessionKeys.API_ACCESS_TOKEN);
-        if (cache == null) {
+        if (cache == null)
+        {
             cache = new Dictionary<string, TokenExchangeResponse>();
         }
 
@@ -44,7 +58,8 @@ public class ApiTokenService {
     {
         var apiToken = GetCachedApiToken(ctx, apiConfig);
 
-        if (apiToken != null) {
+        if (apiToken != null)
+        {
             // TODO: Perform individual token refresh
             return apiToken.access_token;
         }

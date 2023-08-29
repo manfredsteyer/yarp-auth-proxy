@@ -1,8 +1,15 @@
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using YarpAuthProxy.BffLibrary.Utils.Config;
+
+namespace YarpAuthProxy.BffLibrary.Middleware;
 
 public static class XsrfMiddleware
 {
-    public static void UseXsrfCookie(this WebApplication app) {
+    public static void UseXsrfCookie(this WebApplication app)
+    {
         app.UseXsrfCookieCreator();
         app.UseXsrfCookieChecks();
     }

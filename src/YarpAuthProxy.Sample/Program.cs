@@ -1,5 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 
+using YarpAuthProxy.BffLibrary.Middleware;
+using YarpAuthProxy.BffLibrary.Services;
+using YarpAuthProxy.BffLibrary.Utils.Config;
+
 // Disable claim mapping to get claims 1:1 from the tokens
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 

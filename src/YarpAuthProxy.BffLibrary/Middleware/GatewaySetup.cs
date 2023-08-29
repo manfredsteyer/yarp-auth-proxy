@@ -1,10 +1,18 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using YarpAuthProxy.BffLibrary.Services;
+using YarpAuthProxy.BffLibrary.Utils.Config;
+
+namespace YarpAuthProxy.BffLibrary.Middleware;
 
 public static class GatewaySetup
 {
-    private static readonly string ENV_GATEWAY_CONFIG = "GATEWAY_CONFIG"; 
+    private static readonly string ENV_GATEWAY_CONFIG = "GATEWAY_CONFIG";
 
     public static void AddConfigFiles(this WebApplicationBuilder builder)
     {
@@ -21,28 +29,31 @@ public static class GatewaySetup
         }
     }
 
-    private static void AddTokenExchangeService(this WebApplicationBuilder builder, GatewayConfig config) {
+    private static void AddTokenExchangeService(this WebApplicationBuilder builder, GatewayConfig config)
+    {
         var strategy = config.TokenExchangeStrategy;
-        if (string.IsNullOrEmpty(strategy)) {
+        if (string.IsNullOrEmpty(strategy))
+        {
             strategy = "none";
         }
 
-        switch(strategy.ToLower()) {
+        switch (strategy.ToLower())
+        {
             case "none":
-                    builder.Services.AddSingleton<ITokenExchangeService, NullTokenExchangeService>();
-            break;
+                builder.Services.AddSingleton<ITokenExchangeService, NullTokenExchangeService>();
+                break;
 
             case "azuread":
-                    builder.Services.AddSingleton<ITokenExchangeService, AzureAdTokenExchangeService>();
-            break;
+                builder.Services.AddSingleton<ITokenExchangeService, AzureAdTokenExchangeService>();
+                break;
 
             case "default":
-                    builder.Services.AddSingleton<ITokenExchangeService, TokenExchangeService>();
-            break;
+                builder.Services.AddSingleton<ITokenExchangeService, TokenExchangeService>();
+                break;
 
             default:
                 throw new ArgumentException($"Unsupported TokenExchangeStrategy in config found: {config.TokenExchangeStrategy}. Possible values: none, AzureAd, default");
-            
+
         }
     }
 
@@ -53,7 +64,7 @@ public static class GatewaySetup
 
         builder.Services.AddSingleton<DiscoveryDocument>(disco);
         builder.Services.AddSingleton<GatewayConfig>(config);
-        
+
         builder.Services.AddSingleton<TokenRefreshService>();
         builder.AddTokenExchangeService(config);
 
